@@ -104,4 +104,5 @@ This project is open-sourced under the MIT license.
 
 ## 🤝 Credits
 Made with ❤️ by Aboozar Ghaffari
+
 Postal by [Atech Media](https://postal.atech.media)
