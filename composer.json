@@ -1,5 +1,5 @@
 {
-  "name": "php-monstaers/laravel-postal-driver",
+  "name": "php-monsters/laravel-postal-driver",
   "description": "Laravel mail transport driver for Postal API",
   "type": "library",
   "require": {
