@@ -2,45 +2,54 @@
 
 namespace PhpMonsters\LaravelPostalDriver;
 
-use Illuminate\Mail\Transport\Transport;
-use Swift_Mime_SimpleMessage;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\RawMessage;
+use Symfony\Component\Mime\Email;
 use GuzzleHttp\Client;
 
-class PostalTransport extends Transport
+class PostalTransport implements TransportInterface
 {
-    protected string $key;
-    protected string $endpoint;
     protected Client $client;
+    protected string $apiKey;
+    protected string $baseUrl;
 
-    public function __construct(string $key, string $endpoint)
+    public function __construct(Client $client, string $apiKey, string $baseUrl)
     {
-        $this->key = $key;
-        $this->endpoint = rtrim($endpoint, '/');
-        $this->client = new Client();
+        $this->client = $client;
+        $this->apiKey = $apiKey;
+        $this->baseUrl = rtrim($baseUrl, '/');
     }
 
-    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null): int
+    public function send(RawMessage $message, Envelope $envelope = null): SentMessage
     {
-        $to = array_keys($message->getTo())[0];
-        $from = array_keys($message->getFrom())[0];
-        $subject = $message->getSubject();
-        $html = $message->getBody();
-        $plain = strip_tags($html);
+        if (!$message instanceof Email) {
+            throw new \InvalidArgumentException('PostalTransport only supports Email messages.');
+        }
 
-        $response = $this->client->post($this->endpoint . '/api/v1/send/message', [
+        $payload = [
             'headers' => [
-                'X-Server-API-Key' => $this->key,
-                'Content-Type' => 'application/json'
+                'X-Server-API-Key' => $this->apiKey,
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
             ],
             'json' => [
-                'to' => $to,
-                'from' => $from,
-                'subject' => $subject,
-                'plain_body' => $plain,
-                'html_body' => $html
-            ]
-        ]);
+                'from'      => $message->getFrom()[0]->getAddress(),
+                'to'        => array_map(fn($to) => $to->getAddress(), $message->getTo()),
+                'subject'   => $message->getSubject(),
+                'plain_body'=> $message->getTextBody(),
+                'html_body' => $message->getHtmlBody(),
+            ],
+        ];
 
-        return $this->numberOfRecipients($message);
+        $this->client->post("{$this->baseUrl}/send/message", $payload);
+
+        return new SentMessage($message, $envelope);
+    }
+
+    public function __toString(): string
+    {
+        return 'postal';
     }
 }

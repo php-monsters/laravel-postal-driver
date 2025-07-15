@@ -2,8 +2,9 @@
 
 namespace PhpMonsters\LaravelPostalDriver;
 
-use Illuminate\Mail\MailManager;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Mail\MailManager;
+use GuzzleHttp\Client;
 
 class PostalTransportServiceProvider extends ServiceProvider
 {
@@ -11,8 +12,9 @@ class PostalTransportServiceProvider extends ServiceProvider
     {
         $this->app->make(MailManager::class)->extend('postal', function ($config) {
             return new PostalTransport(
-                $config['key'],
-                $config['endpoint'] ?? 'https://postal.yourdomain.com'
+                new Client(),
+                $config['api_key'],
+                $config['base_url']
             );
         });
     }

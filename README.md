@@ -1,7 +1,7 @@
 # Laravel Postal Mail Driver
 
 A custom Laravel mail transport driver to send emails via the [Postal](https://postal.atech.media) mail server using its **HTTP API** instead of SMTP.
-
+Official documentation: https://apiv1.postalserver.io/controllers/send/message.html
 ---
 
 ## 📦 Features
