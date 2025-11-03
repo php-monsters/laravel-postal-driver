@@ -44,7 +44,7 @@ composer update
 ## ⚙️ Configuration
 ### Step 2: Set up .env variables
 ```dotenv
-MAIL_MAILER=postal
+MAIL_DRIVER=postal
 POSTAL_API_KEY=your_postal_api_key_here
 POSTAL_API_ENDPOINT=https://postal.yourdomain.com
 ```
